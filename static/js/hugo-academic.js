@@ -173,20 +173,24 @@
   }
 
   /* ---------------------------------------------------------------------------
-  * Google maps or OpenStreetMap via Leaflet.
+  * Google Maps or OpenStreetMap via Leaflet.
   * --------------------------------------------------------------------------- */
 
   function initMap () {
     if ($('#map').length) {
-      if($('#gmap-lat').length) {
-        let lat = $('#gmap-lat').val();
-        let lng = $('#gmap-lng').val();
-        let address = $('#gmap-dir').val();
-
+      let map_provider = $('#map-provider').val();
+      let lat = $('#map-lat').val();
+      let lng = $('#map-lng').val();
+      let zoom = parseInt($('#map-zoom').val());
+      let address = $('#map-dir').val();
+      let api_key = $('#map-api-key').val();
+      
+      if ( map_provider == 1 ) {
         let map = new GMaps({
           div: '#map',
           lat: lat,
           lng: lng,
+          zoom: zoom,
           zoomControl: true,
           zoomControlOpt: {
             style: 'SMALL',
@@ -210,24 +214,24 @@
           title: address
         })
       } else {
-          let lat = $('#leaflet-lat').val();
-          let lng = $('#leaflet-lng').val();
-          let zoom = $('#leaflet-zoom').val();
-          let address = $('#leaflet-dir').val();
-
           let map = new L.map('map').setView([lat, lng], zoom);
-          if($('#mapbox-token').val().length) {
-            let mapbox_token = $('#mapbox-token').val();
+          if ( map_provider == 3 && api_key.length ) {
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
               attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
               maxZoom: 18,
               id: 'mapbox.streets',
-              accessToken: mapbox_token
+              accessToken: api_key
             }).addTo(map);
           } else {
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
               attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+          }
+          let marker = L.marker([lat, lng]).addTo(map);
+          let url = lat + ',' + lng +'#map='+ zoom +'/'+ lat +'/'+ lng +'&layers=N';
+          marker.bindPopup(address + '<p><a href="https://www.openstreetmap.org/directions?engine=osrm_car&route='+ url +'">Routing via OpenStreetMap</a></p>');
+      }
             }).addTo(map);
           }
           let marker = L.marker([lat, lng]).addTo(map);
